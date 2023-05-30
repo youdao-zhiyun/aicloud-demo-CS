@@ -34,14 +34,12 @@ namespace OpenapiDemo
         {
             // note: 将下列变量替换为需要请求的参数
             string q = "待合成文本";
-            string langType = "语言类型";
-            string voice = "音色编号";
+            string voiceName = "发言人名称";
             string format = "mp3";
 
             return new Dictionary<string, string[]>() {
                 { "q", new string[]{q}},
-                {"langType", new string[]{langType}},
-                {"voice", new string[]{voice}},
+                {"voiceName", new string[]{voiceName}},
                 {"format", new string[]{format}}
             };
         }
