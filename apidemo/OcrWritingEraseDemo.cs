@@ -4,14 +4,14 @@ using System.IO;
 
 namespace OpenapiDemo
 {
-    static class TtsDemo
+    static class OcrWritingEraseDemo
     {
         // 您的应用ID
         private static string APP_KEY = "";
         // 您的应用密钥
         private static string APP_SECRET = "";
 
-        // 合成音频保存路径, 例windows路径：PATH = "C:\\tts\\media.mp3";
+        // 图片路径, 例windows路径：PATH = "C:\\youdao\\media.png";
         private static string PATH = "";
 
         public static void Main()
@@ -22,41 +22,42 @@ namespace OpenapiDemo
             AuthV3Util.addAuthParams(APP_KEY, APP_SECRET, paramsMap);
             Dictionary<String, String[]> header = new Dictionary<string, string[]>() { { "Content-Type", new String[] { "application/x-www-form-urlencoded" } } };
             // 请求api服务
-            byte[] result = HttpUtil.doPost("https://openapi.youdao.com/ttsapi", header, paramsMap, "audio");
+            byte[] result = HttpUtil.doPost("https://openapi.youdao.com/ocr_writing_erase", header, paramsMap, "application/json");
             // 打印返回结果
             if (result != null)
             {
-                saveFile(PATH, result);
+                string resStr = System.Text.Encoding.UTF8.GetString(result);
+                Console.WriteLine(resStr);
             }
         }
 
         private static Dictionary<String, String[]> createRequestParams()
         {
-            // note: 将下列变量替换为需要请求的参数
-            string q = "待合成文本";
-            string voiceName = "发言人名称";
-            string format = "mp3";
-
+            string q = readFileAsBaes64(PATH);
+            string angle = "0";           // 是否进行360角度识别 0：不识别，1：识别。
+            
             return new Dictionary<string, string[]>() {
                 { "q", new string[]{q}},
-                {"voiceName", new string[]{voiceName}},
-                {"format", new string[]{format}}
+                { "angle", new string[]{angle}}
             };
         }
 
-        private static void saveFile(string path, byte[] data)
+        private static string readFileAsBaes64(string path)
         {
             try
             {
-                using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write))
+                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                using (BinaryReader br = new BinaryReader(fs))
                 {
-                    fs.Write(data, 0, data.Length);
-                    Console.WriteLine("save path:  " + path);
+                    var length = br.BaseStream.Length;
+                    var bytes = br.ReadBytes((int)length);
+                    return Convert.ToBase64String(bytes);
                 }
             }
             catch
             {
-                Console.WriteLine("save file error");
+                Console.WriteLine("read file error");
+                return null;
             }
         }
     }
